@@ -88,6 +88,8 @@ namespace esphome
       int roi_width_{6};                  // width of the ROI
       int roi_height_{16};                // height of the ROI
       uint64_t peopleCounter{0};
+      uint16_t startTime;
+      uint16_t endTime;
 
     protected:
       VL53L1X distanceSensor;
