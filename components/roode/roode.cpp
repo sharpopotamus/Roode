@@ -70,7 +70,7 @@ namespace esphome
             zone = zone % 2;
             yield();
             endTime = micros();
-            ESP_LOGD(TAG, "loop time: %d", endTime - StartTime);
+            ESP_LOGD(TAG, "loop time: %d", endTime - startTime);
         }
 
         void Roode::getZoneDistance()
