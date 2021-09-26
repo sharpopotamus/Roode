@@ -68,7 +68,7 @@ namespace esphome
             getZoneDistance();
             zone++;
             zone = zone % 2;
-            // delay(20); //20ms adivsed by ST
+            delay(20); //20ms adivsed by ST
             endTime = millis();
             ESP_LOGD(TAG, "loop time: %d", endTime - startTime);
         }
