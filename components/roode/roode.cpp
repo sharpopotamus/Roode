@@ -64,10 +64,13 @@ namespace esphome
 
         void Roode::loop()
         {
+            startTime = micros();
             getZoneDistance();
             zone++;
             zone = zone % 2;
             yield();
+            endTime = micros();
+            ESP_LOGD(TAG, "loop time: %d", endTime - StartTime);
         }
 
         void Roode::getZoneDistance()
@@ -91,6 +94,7 @@ namespace esphome
                 // Someone is in the sensing area
                 CurrentZoneStatus = SOMEONE;
                 presence_sensor->publish_state(true);
+                ESP_LOGD(TAG, "Someone is in the sensing area");
             }
             else
             {
@@ -101,7 +105,7 @@ namespace esphome
             // left zone
             if (zone == LEFT)
             {
-
+                ESP_LOGD(TAG, "Someone is in the LEFT zone");
                 if (CurrentZoneStatus != LeftPreviousStatus)
                 {
                     // event in left zone has occured
@@ -116,6 +120,7 @@ namespace esphome
                     {
                         // event in right zone has occured
                         AllZonesCurrentStatus += 2;
+                        ESP_LOGD(TAG, "Someone is also in the RIGHT zone");
                     }
                     // remember for next time
                     LeftPreviousStatus = CurrentZoneStatus;
@@ -124,7 +129,7 @@ namespace esphome
             // right zone
             else
             {
-
+                ESP_LOGD(TAG, "Someone is in the RIGHT zone");
                 if (CurrentZoneStatus != RightPreviousStatus)
                 {
 
@@ -138,6 +143,7 @@ namespace esphome
                     if (LeftPreviousStatus == SOMEONE)
                     {
                         // event in left zone has occured
+                        ESP_LOGD(TAG, "Someone is also in the RIGHT zone");
                         AllZonesCurrentStatus += 1;
                     }
                     // remember for next time
