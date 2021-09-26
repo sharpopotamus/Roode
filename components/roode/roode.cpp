@@ -64,12 +64,12 @@ namespace esphome
 
         void Roode::loop()
         {
-            startTime = micros();
+            startTime = millis();
             getZoneDistance();
             zone++;
             zone = zone % 2;
-            yield();
-            endTime = micros();
+            // delay(20); //20ms adivsed by ST
+            endTime = millis();
             ESP_LOGD(TAG, "loop time: %d", endTime - startTime);
         }
 
