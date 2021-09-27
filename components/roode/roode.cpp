@@ -55,6 +55,7 @@ namespace esphome
                 ESP_LOGD("Roode setup", "last value: %d", peopleCounter);
             }
             sendCounter(peopleCounter);
+            ESP_LOGI("Roode setup", "Starting detection now.");
             yield();
         }
 
@@ -65,13 +66,10 @@ namespace esphome
 
         void Roode::loop()
         {
-            startTime = millis();
             getZoneDistance();
             zone++;
             zone = zone % 2;
             yield();
-            endTime = millis();
-            ESP_LOGD(TAG, "loop time: %d", endTime - startTime);
         }
 
         void Roode::getZoneDistance()
