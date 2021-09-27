@@ -55,6 +55,7 @@ namespace esphome
                 ESP_LOGD("Roode setup", "last value: %d", peopleCounter);
             }
             sendCounter(peopleCounter);
+            yield();
         }
 
         void Roode::update()
@@ -68,7 +69,7 @@ namespace esphome
             getZoneDistance();
             zone++;
             zone = zone % 2;
-            delay(20); //20ms adivsed by ST
+            yield();
             endTime = millis();
             ESP_LOGD(TAG, "loop time: %d", endTime - startTime);
         }
@@ -452,7 +453,6 @@ namespace esphome
             int hundred_threshold_zone_1 = DIST_THRESHOLD_MAX[1] / 100;
             int unit_threshold_zone_0 = DIST_THRESHOLD_MAX[0] - 100 * hundred_threshold_zone_0;
             int unit_threshold_zone_1 = DIST_THRESHOLD_MAX[1] - 100 * hundred_threshold_zone_1;
-
             delay(2000);
         }
 
