@@ -104,12 +104,11 @@ namespace esphome
             // left zone
             if (zone == LEFT)
             {
-                ESP_LOGD(TAG, "Someone is in the LEFT zone");
                 if (CurrentZoneStatus != LeftPreviousStatus)
                 {
                     // event in left zone has occured
                     AnEventHasOccured = 1;
-
+                    ESP_LOGD(TAG, "Someone is in the LEFT zone");
                     if (CurrentZoneStatus == SOMEONE)
                     {
                         AllZonesCurrentStatus += 1;
@@ -118,8 +117,8 @@ namespace esphome
                     if (RightPreviousStatus == SOMEONE)
                     {
                         // event in right zone has occured
+                        ESP_LOGD(TAG, "Someone is in the LEFT zone");
                         AllZonesCurrentStatus += 2;
-                        ESP_LOGD(TAG, "Someone is also in the RIGHT zone");
                     }
                     // remember for next time
                     LeftPreviousStatus = CurrentZoneStatus;
@@ -128,12 +127,12 @@ namespace esphome
             // right zone
             else
             {
-                ESP_LOGD(TAG, "Someone is in the RIGHT zone");
                 if (CurrentZoneStatus != RightPreviousStatus)
                 {
 
                     // event in right zone has occured
                     AnEventHasOccured = 1;
+                    ESP_LOGD(TAG, "Someone is in the RIGHT zone");
                     if (CurrentZoneStatus == SOMEONE)
                     {
                         AllZonesCurrentStatus += 2;
@@ -142,7 +141,7 @@ namespace esphome
                     if (LeftPreviousStatus == SOMEONE)
                     {
                         // event in left zone has occured
-                        ESP_LOGD(TAG, "Someone is also in the RIGHT zone");
+                        ESP_LOGD(TAG, "Someone is in the LEFT zone");
                         AllZonesCurrentStatus += 1;
                     }
                     // remember for next time
@@ -228,12 +227,19 @@ namespace esphome
         }
         void Roode::roi_calibration(VL53L1X distanceSensor)
         {
-            // the value of the average distance is used for computing the optimal size of the ROI and consequently also the center of the two zones
-            int function_of_the_distance = 16 * (1 - (0.15 * 2) / (0.34 * (min(average_zone_0, average_zone_1) / 1000)));
-            delay(1000);
-            int ROI_size = min(8, max(4, function_of_the_distance));
-            Roode::roi_width_ = ROI_size;
-            Roode::roi_height_ = ROI_size;
+            int max_average = max(average_zone_0, average_zone_1);
+            if (max_average <= 1700)
+            {
+                roi_width_ = 4;
+            }
+            else if (max_average <= 2500)
+            {
+                roi_width_ = 6;
+            }
+            else if (max_average > 2500)
+            {
+                roi_width_ = 8;
+            }
 
             delay(250);
 
@@ -241,7 +247,7 @@ namespace esphome
             if (advised_sensor_orientation_)
             {
 
-                switch (ROI_size)
+                switch (roi_width_)
                 {
                 case 4:
                     center[0] = 150;
@@ -267,7 +273,7 @@ namespace esphome
             }
             else
             {
-                switch (ROI_size)
+                switch (roi_width_)
                 {
                 case 4:
                     center[0] = 193;
@@ -298,8 +304,7 @@ namespace esphome
             sum_zone_1 = 0;
             for (int i = 0; i < number_attempts; i++)
             {
-                // increase sum of values in Zone 0
-                distanceSensor.setROISize(Roode::roi_width_, Roode::roi_height_);
+                distanceSensor.setROISize(roi_width_, roi_height_);
                 distanceSensor.setROICenter(center[zone]);
                 distanceSensor.startContinuous(delay_between_measurements);
                 distanceSensor.setMeasurementTimingBudget(time_budget_in_ms * 1000);
@@ -308,9 +313,10 @@ namespace esphome
                 sum_zone_0 = sum_zone_0 + distance;
                 zone++;
                 zone = zone % 2;
-
-                // increase sum of values in Zone 1
-                distanceSensor.setROISize(Roode::roi_width_, Roode::roi_height_);
+                delay(20);
+                ESP_LOGD("Calibration", "Distance zone0: %d ", distance);
+                // increase sum of values in Zone 2
+                distanceSensor.setROISize(roi_width_, roi_height_);
                 distanceSensor.setROICenter(center[zone]);
                 distanceSensor.startContinuous(delay_between_measurements);
                 distanceSensor.setMeasurementTimingBudget(time_budget_in_ms * 1000);
@@ -319,11 +325,10 @@ namespace esphome
                 sum_zone_1 = sum_zone_1 + distance;
                 zone++;
                 zone = zone % 2;
-                yield();
+                ESP_LOGD("Calibration", "Distance zone1: %d", distance);
             }
             average_zone_0 = sum_zone_0 / number_attempts;
             average_zone_1 = sum_zone_1 / number_attempts;
-            EEPROM.write(13, ROI_size);
         }
         void Roode::setCorrectDistanceSettings(float average_zone_0, float average_zone_1)
         {
@@ -386,8 +391,8 @@ namespace esphome
                 roi_width_ = roi_height_;
                 roi_height_ = roi_width_;
             }
-
-            delay(500);
+            ESP_LOGD("Calibration", "ROI_width: %d, ROI_height: %d ", roi_width_, roi_height_);
+            delay(5000);
 
             zone = 0;
 
@@ -395,7 +400,7 @@ namespace esphome
             {
                 // increase sum of values in Zone 1
 
-                distanceSensor.setROISize(Roode::roi_width_, Roode::roi_height_);
+                distanceSensor.setROISize(roi_width_, roi_height_);
                 distanceSensor.setROICenter(center[zone]);
                 distanceSensor.startContinuous(delay_between_measurements);
                 distanceSensor.setMeasurementTimingBudget(time_budget_in_ms * 1000);
@@ -404,7 +409,8 @@ namespace esphome
                 sum_zone_0 = sum_zone_0 + distance;
                 zone++;
                 zone = zone % 2;
-
+                delay(20);
+                ESP_LOGD("Calibration", "Distance zone0: %d ", distance);
                 // increase sum of values in Zone 2
                 distanceSensor.setROISize(roi_width_, roi_height_);
                 distanceSensor.setROICenter(center[zone]);
@@ -415,7 +421,7 @@ namespace esphome
                 sum_zone_1 = sum_zone_1 + distance;
                 zone++;
                 zone = zone % 2;
-                yield();
+                ESP_LOGD("Calibration", "Distance zone1: %d", distance);
             }
             // after we have computed the sum for each zone, we can compute the average distance of each zone
             average_zone_0 = sum_zone_0 / number_attempts;
