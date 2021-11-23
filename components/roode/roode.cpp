@@ -171,13 +171,13 @@ namespace esphome
                         {
                             // This an exit
 
-                            //if (peopleCounter > 0)
-                            //{
+                            if (peopleCounter > 0)
+                            {
                                 ESP_LOGD("Roode pathTracking", "Exit detected.");
                                 entry_exit_event_sensor->publish_state("Exit");
                                 peopleCounter--;
                                 sendCounter(peopleCounter);
-                            //}
+                            }
 
                             right = 1;
                             right = 0;
