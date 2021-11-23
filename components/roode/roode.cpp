@@ -170,13 +170,14 @@ namespace esphome
                         if ((PathTrack[1] == 1) && (PathTrack[2] == 3) && (PathTrack[3] == 2))
                         {
                             // This an exit
-                            ESP_LOGD("Roode pathTracking", "Exit detected.");
-                            entry_exit_event_sensor->publish_state("Exit");
-                            if (peopleCounter > 0)
-                            {
+
+                            //if (peopleCounter > 0)
+                            //{
+                                ESP_LOGD("Roode pathTracking", "Exit detected.");
+                                entry_exit_event_sensor->publish_state("Exit");
                                 peopleCounter--;
                                 sendCounter(peopleCounter);
-                            }
+                            //}
 
                             right = 1;
                             right = 0;
